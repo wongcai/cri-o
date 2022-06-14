@@ -33,3 +33,6 @@
       poll: 60
       register: result_async
       ignore_errors: yes
+    - debug:
+        var: result_async.stderr
+
