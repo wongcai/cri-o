@@ -1,6 +1,9 @@
 ---
-- hosts: all
+- hosts: "{{ host }}"
   remote_user: root
+  environment:
+    GOPATH: /usr/go
+  connection: local
   vars_files:
     - "{{ playbook_dir }}/vars.yml"
   tags:
@@ -64,7 +67,7 @@
     - name: install jq
       include: "build/jq.yml"
 
-- hosts: all
+- hosts: "{{ host }}" 
   remote_user: root
   vars_files:
     - "{{ playbook_dir }}/vars.yml"
@@ -142,7 +145,7 @@
     - name: run critest validation and benchmarks
       include: critest.yml
 
-- hosts: all
+- hosts: "{{ host }}"
   remote_user: root
   vars_files:
     - "{{ playbook_dir }}/vars.yml"
@@ -165,7 +168,7 @@
     - name: run k8s e2e tests
       include: e2e.yml
 
-- hosts: all
+- hosts: "{{ host }}" 
   remote_user: root
   vars_files:
     - "{{ playbook_dir }}/vars.yml"

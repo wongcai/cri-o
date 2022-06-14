@@ -8,6 +8,15 @@
     version: "{{ k8s_git_version }}"
     force: "{{ force_clone | default(False) | bool}}"
 
+# replace hardcoded line not to use legacy stats provider
+- name: use CRI stats
+  lineinfile:
+    path: "{{ ansible_env.GOPATH }}/src/k8s.io/kubernetes/pkg/kubelet/cadvisor/util.go"
+    regexp: '^(\s*)runtimeEndpoint == CrioSocket \|\| runtimeEndpoint == \"unix\:\/\/\"\+CrioSocket$'
+    # keep the whitespace to ensure the file still looks pretty :)
+    line: '\1false'
+    backrefs: yes
+
 - name: install etcd
   command: "hack/install-etcd.sh"
   args:
@@ -16,7 +25,7 @@
 - name: build kubernetes
   make:
     chdir: "{{ ansible_env.GOPATH }}/src/k8s.io/kubernetes"
-    target: clean
+    target: all
 
 - name: build kubernetes
   make:
@@ -44,7 +53,7 @@
 
       # Whole script added by Ansible from build/kubernetes.yml
       export PATH=/usr/local/go/bin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/root/bin:{{ ansible_env.GOPATH }}/bin:{{ ansible_env.GOPATH }}/src/k8s.io/kubernetes/third_party/etcd:{{ ansible_env.GOPATH }}/src/k8s.io/kubernetes/_output/local/bin/linux/amd64/
-      export FEATURE_GATES="AllAlpha=false"
+      export FEATURE_GATES="AllAlpha=false,RunAsGroup=true"
       export CONTAINER_RUNTIME=remote
       export CGROUP_DRIVER=systemd
       export CONTAINER_RUNTIME_ENDPOINT='{{ crio_socket }}'
@@ -82,6 +91,11 @@
         KUBECONFIG=/var/run/kubernetes/admin.kubeconfig
     regexp: 'KUBECONFIG='
     state: present
+
+- name: build kubectl
+  make:
+    chdir: "{{ ansible_env.GOPATH }}/src/k8s.io/kubernetes"
+    target: kubectl
 
 - name: install kubectl (for kubetest)
   copy:
