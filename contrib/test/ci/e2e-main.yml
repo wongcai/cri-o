@@ -3,6 +3,7 @@
   become: yes
   environment:
     GOPATH: /usr/go
+    DIRPATH: ~/
   connection: local
   vars_files:
     - "{{ playbook_dir }}/vars.yml"
