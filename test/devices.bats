@@ -68,8 +68,10 @@ function teardown() {
 }
 
 @test "annotation devices support" {
+	setup_crio
 	create_runtime_with_allowed_annotation "device" "io.kubernetes.cri-o.Devices"
-	CONTAINER_ALLOWED_DEVICES="/dev/null" start_crio
+	CONTAINER_ALLOWED_DEVICES="/dev/null"
+	start_crio_no_setup
 
 	jq '      .annotations."io.kubernetes.cri-o.Devices" = "/dev/null:/dev/qifoo:rwm"' \
 		"$TESTDATA"/sandbox_config.json > "$newconfig"
@@ -98,8 +100,10 @@ function teardown() {
 }
 
 @test "annotation should override configured additional_devices" {
+	OVERRIDE_OPTIONS="--additional-devices /dev/urandom:/dev/qifoo:rwm" setup_crio
 	create_runtime_with_allowed_annotation "device" "io.kubernetes.cri-o.Devices"
-	CONTAINER_ALLOWED_DEVICES="/dev/urandom,/dev/null" CONTAINER_ADDITIONAL_DEVICES="/dev/urandom:/dev/qifoo:rwm" start_crio
+	CONTAINER_ALLOWED_DEVICES="/dev/urandom,/dev/null" CONTAINER_ADDITIONAL_DEVICES="/dev/urandom:/dev/qifoo:rwm"
+	start_crio_no_setup
 
 	jq '      .annotations."io.kubernetes.cri-o.Devices" = "/dev/null:/dev/qifoo:rwm"' \
 		"$TESTDATA"/sandbox_config.json > "$newconfig"
@@ -127,8 +131,10 @@ function teardown() {
 }
 
 @test "annotation should configure multiple devices" {
+	setup_crio
 	create_runtime_with_allowed_annotation "device" "io.kubernetes.cri-o.Devices"
-	CONTAINER_ALLOWED_DEVICES="/dev/urandom,/dev/null" start_crio
+	CONTAINER_ALLOWED_DEVICES="/dev/urandom,/dev/null"
+	start_crio_no_setup
 
 	jq '      .annotations."io.kubernetes.cri-o.Devices" = "/dev/null:/dev/qifoo:rwm,/dev/urandom:/dev/peterfoo:rwm"' \
 		"$TESTDATA"/sandbox_config.json > "$newconfig"
@@ -146,8 +152,10 @@ function teardown() {
 }
 
 @test "annotation should fail if one device is invalid" {
+	setup_crio
 	create_runtime_with_allowed_annotation "device" "io.kubernetes.cri-o.Devices"
-	CONTAINER_ALLOWED_DEVICES="/dev/null" start_crio
+	CONTAINER_ALLOWED_DEVICES="/dev/null"
+	start_crio_no_setup
 
 	jq '      .annotations."io.kubernetes.cri-o.Devices" = "/dev/null:/dev/qifoo:rwm,/dove/null"' \
 		"$TESTDATA"/sandbox_config.json > "$newconfig"

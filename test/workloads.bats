@@ -290,9 +290,10 @@ function check_conmon_fields() {
 }
 
 @test "test workload allowed annotation should not work if not configured" {
+	setup_crio
 	create_workload_with_allowed_annotation "io.kubernetes.cri-o.ShmSize" "$activation"
 
-	start_crio
+	start_crio_no_setup
 
 	jq '.annotations."io.kubernetes.cri-o.ShmSize" = "16Mi"' \
 		"$TESTDATA"/sandbox_config.json > "$sboxconfig"

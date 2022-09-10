@@ -31,16 +31,16 @@ CRICTL_BINARY=${CRICTL_PATH:-/usr/bin/crictl}
 # Path of the conmon binary set as a variable to allow overwriting.
 CONMON_BINARY=${CONMON_BINARY:-$(command -v conmon)}
 # Cgroup for the conmon process
-CONTAINER_CONMON_CGROUP=${CONTAINER_CONMON_CGROUP:-pod}
+export CONTAINER_CONMON_CGROUP=${CONTAINER_CONMON_CGROUP:-pod}
 # Path of the default seccomp profile.
-CONTAINER_SECCOMP_PROFILE=${CONTAINER_SECCOMP_PROFILE:-${CRIO_ROOT}/vendor/github.com/containers/common/pkg/seccomp/seccomp.json}
+export CONTAINER_SECCOMP_PROFILE=${CONTAINER_SECCOMP_PROFILE:-${CRIO_ROOT}/vendor/github.com/containers/common/pkg/seccomp/seccomp.json}
 CONTAINER_UID_MAPPINGS=${CONTAINER_UID_MAPPINGS:-}
 CONTAINER_GID_MAPPINGS=${CONTAINER_GID_MAPPINGS:-}
 OVERRIDE_OPTIONS=${OVERRIDE_OPTIONS:-}
 # CNI path
 CONTAINER_CNI_PLUGIN_DIR=${CONTAINER_CNI_PLUGIN_DIR:-/opt/cni/bin}
 # Runtime
-CONTAINER_DEFAULT_RUNTIME=${CONTAINER_DEFAULT_RUNTIME:-runc}
+export CONTAINER_DEFAULT_RUNTIME=${CONTAINER_DEFAULT_RUNTIME:-runc}
 RUNTIME_BINARY_PATH=$(command -v "$CONTAINER_DEFAULT_RUNTIME")
 RUNTIME_TYPE=${RUNTIME_TYPE:-oci}
 PRIVILEGED_WITHOUT_HOST_DEVICES=${PRIVILEGED_WITHOUT_HOST_DEVICES:-}
@@ -70,7 +70,7 @@ CHECKCRIU_BINARY=${CHECKCRIU_BINARY:-${CRIO_ROOT}/test/checkcriu/checkcriu}
 # The default log directory where all logs will go unless directly specified by the kubelet
 DEFAULT_LOG_PATH=${DEFAULT_LOG_PATH:-/var/log/crio/pods}
 # Cgroup manager to be used
-CONTAINER_CGROUP_MANAGER=${CONTAINER_CGROUP_MANAGER:-systemd}
+export CONTAINER_CGROUP_MANAGER=${CONTAINER_CGROUP_MANAGER:-systemd}
 # Image volumes handling
 CONTAINER_IMAGE_VOLUMES=${CONTAINER_IMAGE_VOLUMES:-mkdir}
 # Container pids limit
@@ -191,6 +191,10 @@ function setup_test() {
         --set disable-pull-on-run=true
 
     PATH=$PATH:$TESTDIR
+    
+    RUNTIME_ROOT=${RUNTIME_ROOT:-"$TESTDIR/crio-runtime-root"}
+    # export here so direct calls to crio later inherit the variable
+    export CONTAINER_RUNTIMES=${CONTAINER_RUNTIMES:-$CONTAINER_DEFAULT_RUNTIME:$RUNTIME_BINARY_PATH:$RUNTIME_ROOT:$RUNTIME_TYPE:$PRIVILEGED_WITHOUT_HOST_DEVICES:$RUNTIME_CONFIG_PATH}
 }
 
 # Run crio using the binary specified by $CRIO_BINARY_PATH.
@@ -279,9 +283,6 @@ function setup_crio() {
     CNI_DEFAULT_NETWORK=${CNI_DEFAULT_NETWORK:-crio}
     CNI_TYPE=${CNI_TYPE:-bridge}
 
-    RUNTIME_ROOT=${RUNTIME_ROOT:-"$TESTDIR/crio-runtime-root"}
-    # export here so direct calls to crio later inherit the variable
-    export CONTAINER_RUNTIMES=${CONTAINER_RUNTIMES:-$CONTAINER_DEFAULT_RUNTIME:$RUNTIME_BINARY_PATH:$RUNTIME_ROOT:$RUNTIME_TYPE:$PRIVILEGED_WITHOUT_HOST_DEVICES:$RUNTIME_CONFIG_PATH}
 
     # generate the default config file
     "$CRIO_BINARY_PATH" config --default >"$CRIO_CONFIG"
@@ -603,6 +604,7 @@ runtime_root = "$RUNTIME_ROOT"
 runtime_type = "$RUNTIME_TYPE"
 allowed_annotations = ["$ANNOTATION"]
 EOF
+export CONTAINER_DEFAULT_RUNTIME="$NAME"
 }
 
 function create_workload_with_allowed_annotation() {
