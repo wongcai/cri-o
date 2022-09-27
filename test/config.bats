@@ -45,7 +45,7 @@ function teardown() {
 	[[ "$output" == *"not a valid logrus"*"wrong-level"* ]]
 }
 
-@test "replace default runtime should succeed" {
+@test "choose different default runtime should succeed" {
 	# when
 	unset CONTAINER_RUNTIMES
 	unset CONTAINER_DEFAULT_RUNTIME
@@ -53,7 +53,26 @@ function teardown() {
 
 	# then
 	[[ "$RES" == *"default_runtime = \"crun\""* ]]
-	[[ "$RES" != *"crio.runtime.runtimes.runc"* ]]
+	[[ "$RES" == *"crio.runtime.runtimes.runc"* ]]
+	[[ "$RES" == *"crio.runtime.runtimes.crun"* ]]
+}
+
+@test "runc not existing when default_runtime changed should succeed" {
+	# when
+	unset CONTAINER_RUNTIMES
+	cat << EOF > "$TESTDIR"/50-runc-new-path.conf
+[crio.runtime]
+default_runtime = "crun"
+[crio.runtime.runtimes.runc]
+runtime_path = "/not/there"
+[crio.runtime.runtimes.crun]
+runtime_path="/usr/bin/crun"
+EOF
+	RES=$("$CRIO_BINARY_PATH" -c "$TESTDIR"/50-runc-new-path.conf -d "" config 2>&1)
+
+	# then
+	[[ "$RES" == *"default_runtime = \"crun\""* ]]
+	[[ "$RES" == *"crio.runtime.runtimes.runc"* ]]
 	[[ "$RES" == *"crio.runtime.runtimes.crun"* ]]
 }
 
