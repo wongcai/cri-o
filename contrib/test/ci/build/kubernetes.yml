@@ -45,6 +45,8 @@
       EnvironmentFile=-/etc/environment
       WorkingDirectory={{ ansible_env.GOPATH }}/src/k8s.io/kubernetes
       ExecStart=/usr/local/bin/createcluster.sh
+      Restart=always
+      RestartSec=3s
       User=root
       [Install]
       WantedBy=multi-user.target
