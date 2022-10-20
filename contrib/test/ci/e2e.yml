@@ -30,6 +30,7 @@
       - "[sig-network] Services should have session affinity work for service with type clusterIP"
       - "[sig-network] Services should create endpoints for unready pods"
       - "[sig-network] Services should be possible to connect to a service via ExternalIP when the external IP is not assigned to a node"
+      - "[sig-network] Services should be able to switch session affinity for service with type clusterIP"
   set_fact:
     e2e_shell_cmd: >
         DBUS_SESSION_BUS_ADDRESS="unix:path=/var/run/dbus/system_bus_socket" KUBE_CONTAINER_RUNTIME="remote" GINKGO_TOLERATE_FLAKES="y" GINKGO_PARALLEL_NODES=6 GINKGO_PARALLEL=y KUBE_SSH_USER="{{ ssh_user }}" LOCAL_SSH_KEY="{{ ssh_location }}"
