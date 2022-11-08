@@ -309,6 +309,7 @@ function check_conmon_fields() {
 	if test -n "$CONTAINER_UID_MAPPINGS"; then
 		skip "userNS enabled"
 	fi
+	unset CONTAINER_RUNTIMES
 	unset CONTAINER_DEFAULT_RUNTIME
 	create_workload_with_allowed_annotation "io.kubernetes.cri-o.Devices"
 	create_runtime_with_allowed_annotation "shmsize" "io.kubernetes.cri-o.ShmSize"

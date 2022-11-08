@@ -604,7 +604,6 @@ runtime_root = "$RUNTIME_ROOT"
 runtime_type = "$RUNTIME_TYPE"
 allowed_annotations = ["$ANNOTATION"]
 EOF
-export CONTAINER_DEFAULT_RUNTIME="$NAME"
 }
 
 function create_workload_with_allowed_annotation() {
